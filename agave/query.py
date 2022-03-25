@@ -18,28 +18,28 @@ class Cooccurrence:
 
 @dataclass
 class Chain:
-    head: object = None 
     relations: List[ Cooccurrence ] = field(default_factory=list)
-
-    def add_head(self, entity):
-        if len(self.relations) == 0:
-            self.head = entity
-    
-    def get_tail(self):
-        if len(self.relations) == 0:
-            return self.head
-        else:
-            return self.relations[-1].object_2
-    
-    def add_node(self, entity, relation_class):
-        tail = self.get_tail()
-        self.relations.append(relation_class(tail, entity))
+    entities: List[Entity] = field(default_factory=list)
 
 @dataclass
 class ContainmentBox:
-    chains: List[ Chain ]
+    chains: List[ Chain ] = field(default_factory=list)
 
 @dataclass
 class GraphicalAbstract:
-    chains: List[ Chain ]
-    boxes: List[ ContainmentBox ]
+    chains: List[ Chain ] = field(default_factory=list)
+    boxes: List[ ContainmentBox ] = field(default_factory=list)
+    entities: List[Entity] = field(default_factory=list)
+    relations: List[Cooccurrence] = field(default_factory=list)
+
+    def add_entity(self, entity):
+        self.entities.append(entity)
+    
+    def add_relation(self, entity_1, entity_2, relation_class):
+        self.relations.append(Cooccurrence(entity_1, entity_2))
+
+    def add_chain(self):
+        self.chains.append(Chain())
+    
+    def add_box(self):
+        self.boxes.append(ContainmentBox)
