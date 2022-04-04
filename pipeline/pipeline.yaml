@@ -1,0 +1,5 @@
+tasks:
+  - source: tasks.get.metadata
+    product:
+      metadata: products/metadata.parquet
+      changelog: products/changelog.txt

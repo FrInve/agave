@@ -130,3 +130,6 @@ dmypy.json
 
 # VSCode
 .vscode/
+
+# Pipeline's products directory
+pipeline/products/
