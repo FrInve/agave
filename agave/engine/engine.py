@@ -6,11 +6,17 @@ class Gatherer:
         self.cache = cache
         self.papers = pd.DataFrame(data=None, columns=['cord_uid', 'relation','original'])
     
+    def add_papers_from_bigram(self, bigram, original):
+        uids = self.cache.get_papers_by_bigram(bigram)
+        for uid in uids:
+            self.add_paper(uid, bigram, original)
+
     def add_paper(self, cord_uid, relation, original):
-        new_row = pd.DataFrame(data=[cord_uid, relation, original], columns=self.paper.columns)
-        self.papers = pd.concat(self.papers, new_row)
+        new_row = pd.DataFrame(data={'cord_uid':cord_uid, 'relation':relation, 'original':original}, index=[0],columns=self.papers.columns)
+        self.papers = pd.concat([self.papers, new_row], ignore_index=True)
         return new_row
-    
+# --------------------------------------------------------
+
 class Stoner:
     def __init__(self, graph_db):
         self.graph_db = graph_db
@@ -29,14 +35,21 @@ class Stoner:
             segment.show_paths()
             print('-------------------------')
     
-    def select_path(indexes):
-        self.selected_path = indexes
+    def select_path(self,indexes):
+        self.selected_path = []
         for position, segment in enumerate(self.meta_path.values()):
-            segment.select_path(indexes[position])
+            self.selected_path.append(segment.select_path(indexes[position]))
     
-    def show_selected_path():
-        return
-
+    def show_selected_path(self):
+        #for segment in self.meta_path.values():
+        #    segment.show_selected_path()
+        segment_names = [str(x) for x in self.meta_path.values()]
+        for idx, segment in self.selected_path:
+            print(segment_names[idx])
+            print(idx, segment.relationships)
+    
+    def get_selected_path_relations(self):
+        return [x[1].relationships for x in self.selected_path]    
 
 
 class MetaSegment:
@@ -59,4 +72,9 @@ class MetaSegment:
             if idx == index:
                 self.selected_path=record
                 return idx, record
+
+    def show_selected_path(self):
+        print(str(self))
+        print(self.selected_path)
+        #print(str(self.selected_path[0]) + '\t' + self.selected_path[1].relationships )
             

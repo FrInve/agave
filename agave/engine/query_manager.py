@@ -19,3 +19,12 @@ class MichaelScott:
         '''
         self.stoner.select_path(path_idxs)
         self.stoner.show_selected_path()
+    
+    def gather_papers(self):
+        for segment in self.stoner.get_selected_path_relations():
+            for relation in segment:
+                if relation == segment[0] or relation == segment[-1]:
+                    original = True
+                else:
+                    original = False
+                self.gatherer.add_papers_from_bigram(relation, original)
