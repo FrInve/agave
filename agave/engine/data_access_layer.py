@@ -1,9 +1,9 @@
-import pandas as pd
-import pickledb
-import sqlite3
 import neo4j
 import logging
 from neo4j import GraphDatabase
+import pickledb
+import pandas as pd
+import sqlite3
 
 class CooccurrencyGraph:
 
@@ -67,24 +67,36 @@ class ShortestPathsRecord:
     def __repr__(self):
         return str(self.path)
 
-graph_db_uri = 'neo4j+s://91bd4f79.databases.neo4j.io'
-graph_db_user = 'neo4j'
-graph_db_password = 'syc9_tjj2ECTW03hPNtfSN4j6G6Q6lKUUp7YkYP3ALc'
-graph_db = CooccurrencyGraph(graph_db_uri, graph_db_user, graph_db_password)
-
 # -----------------------------------------------------
 class PaperCache:
     def __init__(self, path_entity, path_bigram):
         self.by_entity = pickledb.load(path_entity, False)
         self.by_bigram = pickledb.load(path_bigram, False)
+    
+    def get_papers_by_bigram(self, bigram):
+        return self.by_bigram.get(bigram)
+    
+    def get_papers_by_bigrams(self, bigrams):
+        result = {}
+        for bigram in bigrams:
+            result[bigram] = self.get_papers_by_bigram(bigram)
+        return result
 
-paper_cache = PaperCache('~/Documents/tesi_local/agave-0/entity_paper.db', '~/Documents/tesi_local/agave-0/bigram_paper.db')
 
 
 # ------------------------------------------------------
 
 class Metadata:
-    def __init__(self, metadata_csv_path):
-        self.df = pd.read_csv(metadata_csv_path)
+    def __init__(self, metadata_csv_path, sample=False):
+        if sample:
+            self.df = pd.read_csv(metadata_csv_path, nrows=500)
+        else:
+            self.df = pd.read_csv(metadata_csv_path)
         self.df['publish_time'] = pd.to_datetime(self.df['publish_time'])
         self.df = self.df.set_index('cord_uid')
+
+    def get_paper(self, cord_uid):
+        return self.df.loc[cord_uid].to_dict()
+    
+    def get_papers(self, cord_uids):
+        return [self.get_paper(cord_uid) for cord_uid in cord_uids]
