@@ -13,4 +13,5 @@ tasks:
       cleaned_metadata: products/cleaned_metadata.parquet
     params:
       sample: True
+      link_journal: False
   

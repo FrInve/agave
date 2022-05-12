@@ -8,14 +8,17 @@ import pandas as pd
 import numpy as np
 from thefuzz import fuzz, process
 from pandarallel import pandarallel
+from tqdm import tqdm 
 
-pandarallel.initialize(use_memory_fs=False)
+tqdm.pandas()
+pandarallel.initialize(use_memory_fs=False, progress_bar=True)
 
 # %% tags=["parameters"]
 # Parameters
 upstream = ['get']
 product = None
 sample = None
+link_journal = None
 # %%
 
 metadata_path = str(upstream['get']['metadata'])
@@ -27,7 +30,7 @@ types_dict.update({col:str for col in col_names})
 df = pd.read_csv(metadata_path, dtype=types_dict)
 
 if sample:
-    df = df.sample(frac=0.01, random_state=777)
+    df = df.sample(frac=0.001, random_state=777)
 
 print("Original shape is ", str(df.shape))
 
@@ -113,78 +116,76 @@ df = df[df.abstract.notna()]
 
 # %%
 # Load CiteScore data
-cs = pd.read_csv('/home/frinve/Code/agave/pipeline/rsc/CiteScoreMay2021.csv', sep=';')
+if link_journal:
+    cs = pd.read_csv('/home/frinve/Code/agave/pipeline/rsc/CiteScoreMay2021.csv', sep=';')
 
-#Change locale to us_US
-cs['CiteScore 2020'] = cs['CiteScore 2020'].str.replace(',','.')
-cs['CiteScore 2020'] = cs['CiteScore 2020'].apply(float)
-cs = cs.drop_duplicates(subset=["Scopus Source ID"])
-TITLES = cs.Title.to_list()
-
-# %%
+    #Change locale to us_US
+    cs['CiteScore 2020'] = cs['CiteScore 2020'].str.replace(',','.')
+    cs['CiteScore 2020'] = cs['CiteScore 2020'].apply(float)
+    cs = cs.drop_duplicates(subset=["Scopus Source ID"])
+    TITLES = cs.Title.to_list()
 
 
-# Expand J or J. to Journal
-def expandJournal(title):
-    return ' '.join(["Journal" if (token=="J" or token=="J.") else token for token in title.split()])
+    # Expand J or J. to Journal
+    def expandJournal(title):
+        return ' '.join(["Journal" if (token=="J" or token=="J.") else token for token in title.split()])
 
-SUBS = {"j":"journal",
-        "j.":"Journal",
-        "arch":"archives",
-        "arch.":"archives",
-        "int":"international",
-        "int.":"international",
-        "ann":"annals",
-        "biol":"biology",
-        "biol.":"biology",
-        "med":"medicine",
-        "med.":"medicine",
-        "dis.":"disease",
-        "dis":"disease",
-        "jpn":"japan",
-        "res":"research",
-        "rep":"report",
-        "eur":"european",
-        "exp":"experimental",
-        "ther":"therapeutic",
-        "manag":"management",
-        "phys":"physical",
-        "biomol":"biomolecular",
-        "struct":"structural",
-        "mol":"molecular",
-        "sci.":"science",
-        "sci":"science",
-        "(basel)":"",
-        "pract":"practice",
-        "(Stuttg.)":"",
-        "educ":"education",
-        "clin":"clinical",
-        "surg":"surgery"
-}
+    SUBS = {"j":"journal",
+            "j.":"Journal",
+            "arch":"archives",
+            "arch.":"archives",
+            "int":"international",
+            "int.":"international",
+            "ann":"annals",
+            "biol":"biology",
+            "biol.":"biology",
+            "med":"medicine",
+            "med.":"medicine",
+            "dis.":"disease",
+            "dis":"disease",
+            "jpn":"japan",
+            "res":"research",
+            "rep":"report",
+            "eur":"european",
+            "exp":"experimental",
+            "ther":"therapeutic",
+            "manag":"management",
+            "phys":"physical",
+            "biomol":"biomolecular",
+            "struct":"structural",
+            "mol":"molecular",
+            "sci.":"science",
+            "sci":"science",
+            "(basel)":"",
+            "pract":"practice",
+            "(Stuttg.)":"",
+            "educ":"education",
+            "clin":"clinical",
+            "surg":"surgery"
+    }
 
-SUBS_KEYS = SUBS.keys()
+    SUBS_KEYS = SUBS.keys()
 
-# Expand common NLM Title abbreviations
-def expandNLM(title):
-    expTitle = []
-    for token in title.lower().split():
-        if token in SUBS_KEYS:
-            token = SUBS[token]
-        expTitle.append(token)
-    return ' '.join(expTitle)
+    # Expand common NLM Title abbreviations
+    def expandNLM(title):
+        expTitle = []
+        for token in title.lower().split():
+            if token in SUBS_KEYS:
+                token = SUBS[token]
+            expTitle.append(token)
+        return ' '.join(expTitle)
 
-def getJournal(title):
-    if str(title).lower() == "nan":
-        return np.nan
-    else:
-        matched_title = process.extractOne(expandNLM(title), TITLES, scorer=fuzz.token_sort_ratio)
-        if matched_title[1] > 72:
-            return matched_title[0]
-        else:
+    def getJournal(title):
+        if str(title).lower() == "nan":
             return np.nan
+        else:
+            matched_title = process.extractOne(expandNLM(title), TITLES, scorer=fuzz.token_sort_ratio)
+            if matched_title[1] > 72:
+                return matched_title[0]
+            else:
+                return np.nan
 
-# %%
-df['CiteScoreJournal'] = df['journal'].parallel_apply(getJournal)
+    df['CiteScoreJournal'] = df['journal'].apply(getJournal)
 
 # %%
 df.to_parquet(str(product['cleaned_metadata']))
