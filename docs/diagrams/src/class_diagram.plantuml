@@ -1,0 +1,113 @@
+@startuml AgaveClassDiagram
+skinparam Linetype polyline
+'skinparam Linetype ortho
+scale 3000*3000
+
+package pandas #LightGray{
+    class DataFrame
+}
+package agave{
+    package query_manager {
+        class MichaelScott{
+            - Stoner stoner
+            - Gatherer gatherer
+            - List query
+            + find_single_chain(entities: List[String])
+            show_single_chain_result()
+            + select_path_single_chain(path: List[int])
+            + gather_papers()
+        }
+    }
+    package "engine"{
+        class Gatherer{
+            - Metadata metadata
+            - PaperCache cache
+            - DataFrame papers
+            + add_papers_from_bigram(bigram: String)
+            - add_paper(cord_uid, relation, original)
+        }
+        class Stoner{
+            CooccurrencyGraph graph_db
+            Dict[MetaSegment] meta_path
+            List[MetaSegment] selected_path
+            + get_meta_path(chain: List[String])
+            show_meta_paths()
+            + selected_path(indexes: List[int])
+            show_selected_path()
+            + get_selected_path_relations()
+        }
+        
+        class MetaSegment{
+            - String head
+            - String tail
+            - ShortestPathResult shortest_paths
+            show_paths()
+            + select_path(index: int)
+            show_selected_path()
+        }
+    }
+    package "data_access_layer" {
+        class CooccurrencyGraph{
+            - GraphDatabase.driver driver
+            + test_connection()
+            + ShortestPathResult get_shortest_paths(head,tail)
+            - _test_connection(tx)
+            - _get_shortest_paths(tx,head,tail)
+        }
+
+        class ShortestPathsResult{
+            +Graph graph
+            +List[ShortestPathRecord] records
+        }
+
+        class ShortestPathsRecord {
+            +Path path
+            +Float avg_pwmi
+            +List[String] relationships
+        }
+        CooccurrencyGraph -right- ShortestPathsResult
+        'note right on link: get_shortest_path()
+        ShortestPathsResult *-right- ShortestPathsRecord
+
+        ''' ----------------------------------
+        class PaperCache {
+            - PickleDb by_entity
+            - PickleDb by_bigram
+            + List[String] get_papers_by_bigram(bigram: String)
+            + Dict get_papers_by_bigrams(bigrams: List[String])
+        }
+        ''' ----------------------------------
+        class Metadata{
+            - DataFrame df
+            + DataFrame get_paper(cord_uid)
+            + DataFrame get_papers(cord_uids: List[String])
+        }
+    }
+    Gatherer *-down- Metadata
+    Gatherer *-down- PaperCache
+    Gatherer *-down- DataFrame
+    Stoner *-down- CooccurrencyGraph
+    Stoner *-left- MetaSegment
+    MetaSegment *-- ShortestPathsResult
+}
+
+Metadata *-down- DataFrame
+
+PaperCache *-down- pickledb
+
+package pickledb #LightGray{
+    class pickledb{
+        +load()
+    }
+}
+
+package neo4j #LightGray{
+    class GraphDatabase
+    class Graph
+}
+
+MichaelScott *-- Gatherer
+MichaelScott *-- Stoner
+CooccurrencyGraph *-- GraphDatabase
+Graph --* ShortestPathsResult
+@enduml
