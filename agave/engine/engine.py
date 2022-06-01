@@ -4,16 +4,16 @@ class Gatherer:
     def __init__(self, metadata, cache):
         self.metadata = metadata
         self.cache = cache
-        self.papers = pd.DataFrame(data=None, columns=['cord_uid', 'relation','original'])
+        self.papers = pd.DataFrame(data=None, columns=['cord_uid', 'relation','original','meta_relation'])
         self.extracted_papers = pd.DataFrame(data=None, columns=['cord_uid','title','abstract','doi','authors','journal','publish_time','occurrences','explained_relations'])
     
-    def add_papers_from_bigram(self, bigram, original):
+    def add_papers_from_bigram(self, bigram, original, meta_relation):
         uids = self.cache.get_papers_by_bigram(bigram)
         for uid in uids:
-            self.add_paper(uid, bigram, original)
+            self.add_paper(uid, bigram, original, meta_relation)
 
-    def add_paper(self, cord_uid, relation, original):
-        new_row = pd.DataFrame(data={'cord_uid':cord_uid, 'relation':relation, 'original':original}, index=[0],columns=self.papers.columns)
+    def add_paper(self, cord_uid, relation, original, meta_relation=''):
+        new_row = pd.DataFrame(data={'cord_uid':cord_uid, 'relation':relation, 'original':original, 'meta_relation':meta_relation}, index=[0],columns=self.papers.columns)
         self.papers = pd.concat([self.papers, new_row], ignore_index=True)
         return new_row
     
@@ -31,6 +31,18 @@ class Gatherer:
             relations = self.papers[self.papers.cord_uid == paper['cord_uid']].relation.tolist()
             new_row.explained_relations = str(relations)
             self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
+    
+    def get_paper_by_cord_uid(self):
+        return
+    
+    def get_paper_by_doi(self):
+        return
+    
+    def get_papers_by_relation(self):
+        return
+    
+    def get_papers_by_meta_relation(self):
+        return
 # --------------------------------------------------------
 
 class Stoner:
@@ -65,7 +77,7 @@ class Stoner:
             print(idx, segment.relationships)
     
     def get_selected_path_relations(self):
-        return [x[1].relationships for x in self.selected_path]    
+        return [x[1].relationships for x in self.selected_path]  
 
 
 class MetaSegment:

@@ -66,6 +66,9 @@ class ShortestPathsRecord:
     
     def __repr__(self):
         return str(self.path)
+    
+    def get_meta_path_name(self):
+        return str(self.path.start_node['entity'])+'-->'+str(self.path.end_node['entity'])
 
 # -----------------------------------------------------
 class PaperCache:

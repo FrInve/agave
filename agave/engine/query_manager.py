@@ -28,3 +28,16 @@ class MichaelScott:
                 else:
                     original = False
                 self.gatherer.add_papers_from_bigram(relation, original)
+        self.gatherer.extract_papers()
+    
+    def _gather_papers(self):
+        for record_tuple in self.stoner.selected_path:
+            record = record_tuple[1]
+            segment = record.relationships
+            for relation in segment:
+                if relation == segment[0] or relation == segment[-1]:
+                    original = True
+                else:
+                    original = False
+                self.gatherer.add_papers_from_bigram(relation, original, record.get_meta_path_name())
+        self.gatherer.extract_papers()
