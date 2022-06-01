@@ -5,6 +5,7 @@ class Gatherer:
         self.metadata = metadata
         self.cache = cache
         self.papers = pd.DataFrame(data=None, columns=['cord_uid', 'relation','original'])
+        self.extracted_papers = pd.DataFrame(data=None, columns=['cord_uid','title','abstract','doi','authors','journal','publish_time','occurrences','explained_relations'])
     
     def add_papers_from_bigram(self, bigram, original):
         uids = self.cache.get_papers_by_bigram(bigram)
@@ -15,6 +16,21 @@ class Gatherer:
         new_row = pd.DataFrame(data={'cord_uid':cord_uid, 'relation':relation, 'original':original}, index=[0],columns=self.papers.columns)
         self.papers = pd.concat([self.papers, new_row], ignore_index=True)
         return new_row
+    
+    def extract_papers(self):
+        # Initialize the structure again
+        self.extracted_papers = pd.DataFrame(data=None, columns=self.extracted_papers.columns)
+        grouped = self.papers.groupby(by=['cord_uid']).count()
+        uids = grouped.reset_index().cord_uid.tolist()
+        papers = self.metadata.get_papers(uids)
+        for paper in papers:
+            new_row = pd.DataFrame(data=[paper], columns=self.extracted_papers.columns)
+            new_row = new_row.set_index('cord_uid')
+            new_row.occurrences = grouped.relation
+            new_row = new_row.reset_index()
+            relations = self.papers[self.papers.cord_uid == paper['cord_uid']].relation.tolist()
+            new_row.explained_relations = str(relations)
+            self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
 # --------------------------------------------------------
 
 class Stoner:

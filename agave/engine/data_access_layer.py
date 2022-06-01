@@ -89,14 +89,20 @@ class PaperCache:
 class Metadata:
     def __init__(self, metadata_csv_path, sample=False):
         if sample:
-            self.df = pd.read_csv(metadata_csv_path, nrows=500)
+            self.df = pd.read_csv(metadata_csv_path, nrows=10000)
         else:
             self.df = pd.read_csv(metadata_csv_path)
         self.df['publish_time'] = pd.to_datetime(self.df['publish_time'])
         self.df = self.df.set_index('cord_uid')
 
     def get_paper(self, cord_uid):
-        return self.df.loc[cord_uid].to_dict()
+        try:
+            result = self.df.loc[cord_uid].to_dict()
+            result['cord_uid'] = cord_uid
+            return result
+        except KeyError:
+            return
     
     def get_papers(self, cord_uids):
-        return [self.get_paper(cord_uid) for cord_uid in cord_uids]
+        result = [self.get_paper(cord_uid) for cord_uid in cord_uids]
+        return [elem for elem in result if elem is not None]
