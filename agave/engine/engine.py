@@ -32,17 +32,21 @@ class Gatherer:
             new_row.explained_relations = str(relations)
             self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
     
-    def get_paper_by_cord_uid(self):
-        return
+    def get_paper_by_cord_uid(self, cord_uid):
+        return self.extracted_papers[self.extracted_papers.cord_uid == cord_uid]
     
-    def get_paper_by_doi(self):
-        return
+    def get_paper_by_doi(self, doi):
+        return self.extracted_papers[self.extracted_papers.doi == doi]
     
-    def get_papers_by_relation(self):
-        return
+    def get_papers_by_relation(self, relation):
+        uids = self.papers[self.papers.relation == relation].cord_uid.tolist()
+        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
+        return result
     
-    def get_papers_by_meta_relation(self):
-        return
+    def get_papers_by_meta_relation(self, meta_relation):
+        uids = self.papers[self.papers.meta_relation == meta_relation].cord_uid.tolist()
+        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
+        return result
 # --------------------------------------------------------
 
 class Stoner:
