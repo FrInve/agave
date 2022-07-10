@@ -94,7 +94,7 @@ class MetaSegment:
     def show_paths(self):
         print(str(self))
         for idx, record in enumerate(self.shortest_paths.records):
-            print(str(idx), record.relationships, '\t\t\t',record.avg_pwmi)
+            print(str(idx), record.relationships, '\t\t\t',record.avg_npmi)
 
     def __str__(self):
         return self.head + '-->' + self.tail

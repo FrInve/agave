@@ -25,13 +25,16 @@ class MichaelScott:
             self.stoner.get_meta_path(chain)
     
     def gather_papers(self):
+        """
+        DEPRECATED!
+        """
         for segment in self.stoner.get_selected_path_relations():
             for relation in segment:
                 if relation == segment[0] or relation == segment[-1]:
                     original = True
                 else:
                     original = False
-                self.gatherer.add_papers_from_bigram(relation, original)
+                self.gatherer.add_papers_from_bigram(relation, original, str(segment))
         self.gatherer.extract_papers()
     
     def _gather_papers(self):
