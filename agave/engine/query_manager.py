@@ -19,6 +19,10 @@ class MichaelScott:
         '''
         self.stoner.select_path(path_idxs)
         self.stoner.show_selected_path()
+
+    def find_graphical_abstract(self, ga):
+        for chain in ga.chains:
+            self.stoner.get_meta_path(chain)
     
     def gather_papers(self):
         for segment in self.stoner.get_selected_path_relations():

@@ -31,19 +31,14 @@ class ContainmentBox:
     chains: List[Entity] = field(default_factory=list)
 
 class GraphicalAbstract:
-
     def __init__(self):
-        self.__graph = nx.Graph()
-        self.__relations = {}
-        self.__containment_boxes = []
-
-    def add_entity(self, entity):
-        self.__graph.add_node(entity)
-
-    def add_relation(self, entity_1, entity_2, relation_str):
-        relation = Cooccurrence(entity_1, entity_2)
-        self.__relations[relation.get_id()] = relation_str
-        self.__graph.add_edge(relation.first_entity, relation.second_entity)
-
-    def list_relations(self):
-        return self.__relations.items()
+        self.graph = nx.Graph()
+        self.chains = []
+    
+    def check_graph(self):
+        return True
+    
+    def add_chain(self, chain):
+        self.graph.add_nodes_from(chain)
+        self.graph.add_edges_from(zip(chain,chain[1:]))
+        self.chains.append(chain)
