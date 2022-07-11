@@ -32,7 +32,7 @@ import networkx as nx
 
 class GraphicalAbstract:
     def __init__(self, chains=[]):
-        if len(chain) == 0:
+        if len(chains) == 0:
             self.graph = nx.Graph()
         else:
             self.load(chains)
@@ -53,6 +53,8 @@ class GraphicalAbstract:
         return ['<>'.join(chain) for chain in self.chains]
     
     def load(self, chains):
+        self.graph = nx.Graph()
+        self.chains=[]
         for s in chains:
             l = s.split('<>')
             print(l)
