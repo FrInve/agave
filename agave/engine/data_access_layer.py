@@ -61,6 +61,19 @@ class CooccurrencyGraph:
         result = tx.run(query, head=head, tail=tail)
         out = ShortestPathsResult(result)
         return out
+    
+    def resolve_name(self,_name):
+        with self.driver.session() as session:
+            result = session.read_transaction(
+                self._resolve_name, _name)
+            return result
+    
+    @staticmethod
+    def _resolve_name(tx, _name):
+        query = "MATCH (a) WHERE a.name =~ '.*(?i)%s.*' RETURN a.name, a.umls_id, a.frequency" % _name
+        result = tx.run(query, name=_name)
+        result = [{"name":record['a.name'],"umls_id":record['a.umls_id'],"frequency":record['a.frequency']} for record in list(result)]
+        return result
 
 
 class ShortestPathsResult:
