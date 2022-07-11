@@ -31,8 +31,11 @@ import networkx as nx
 #    chains: List[Entity] = field(default_factory=list)
 
 class GraphicalAbstract:
-    def __init__(self):
-        self.graph = nx.Graph()
+    def __init__(self, chains=[]):
+        if len(chain) == 0:
+            self.graph = nx.Graph()
+        else:
+            self.load(chains)
         self.chains = []
     
     def check_graph(self):
