@@ -13,7 +13,7 @@ class MichaelScott:
     def show_single_chain_result(self):
         self.stoner.show_meta_paths()
     
-    def select_path_single_chain(self, path_idxs):
+    def select_path(self, path_idxs):
         '''
         This indexes are the same shown in show_single_chain_result
         '''
@@ -24,9 +24,12 @@ class MichaelScott:
         for chain in ga.chains:
             self.stoner.get_meta_path(chain)
     
+    def show_found_paths(self):
+        self.stoner.show_meta_paths()
+    
     def gather_papers(self):
         """
-        DEPRECATED!
+        This method is DEPRECATED, use _gather_papers instead
         """
         for segment in self.stoner.get_selected_path_relations():
             for relation in segment:

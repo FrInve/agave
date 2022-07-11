@@ -56,11 +56,15 @@ class Stoner:
         self.selected_path = []
     
     def get_meta_path(self, chain):
-        self.meta_path = {}
+        #self.meta_path = {}
         for first, second in zip(chain, chain[1:]):
            ms = MetaSegment(first, second)
            ms.shortest_paths=self.graph_db.get_shortest_paths(first, second)
            self.meta_path[str(ms)] = ms
+    
+    def get_meta_paths(self, chains):
+        for chain in chains:
+            self.get_meta_path(chain)
     
     def show_meta_paths(self):
         for segment in self.meta_path.values():
@@ -76,10 +80,16 @@ class Stoner:
         #for segment in self.meta_path.values():
         #    segment.show_selected_path()
         segment_names = [str(x) for x in self.meta_path.values()]
-        for idx, segment in self.selected_path:
+        idx=0
+        for i, segment in self.selected_path:
             print(segment_names[idx])
-            print(idx, segment.relationships)
+            print(i, segment.relationships)
+            print('--------------------------')
+            idx+=1
     
+    def get_segment_names(self):
+        return [str(x) for x in self.meta_path.values()]
+
     def get_selected_path_relations(self):
         return [x[1].relationships for x in self.selected_path]  
 
@@ -95,6 +105,9 @@ class MetaSegment:
         print(str(self))
         for idx, record in enumerate(self.shortest_paths.records):
             print(str(idx), record.relationships, '\t\t\t',record.avg_npmi)
+
+            if idx >= 10:
+                break
 
     def __str__(self):
         return self.head + '-->' + self.tail
