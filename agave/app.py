@@ -40,4 +40,13 @@ class Agave:
     def autoselect_path(self):
         indexes_len = len(self.manager.stoner.get_segment_names())
         self.manager.select_path([0]*indexes_len)
+    
+    def show_found_papers(self, head=10):
+        return self.manager.gatherer.extracted_papers.head(10)
+    
+    def retrieve_papers(self):
+        self.manager._gather_papers()
+
+    def get_papers(self):
+        return self.manager.gatherer.extracted_papers
 
