@@ -192,5 +192,16 @@ class Metadata:
     #            return
     #
     def get_papers(self, cord_uids):
-        result = [self.get_paper(cord_uid) for cord_uid in cord_uids]
-        return [elem for elem in result if elem is not None]
+        #result = [self.get_paper(cord_uid) for cord_uid in cord_uids]
+        #return [elem for elem in result if elem is not None]
+        query = """SELECT *
+        FROM metadata
+        WHERE cord_uid IN %s ;
+        """ % ('(' + ','.join(["\'"+id+"\'" for id in cord_uids]) + ')')
+        try:
+            result = pd.read_sql(query, self.engine)
+            result = result.T.to_dict().values()
+        except Exception as e:
+            print(e)
+            result = {}
+        return result

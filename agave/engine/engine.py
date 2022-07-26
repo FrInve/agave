@@ -47,21 +47,21 @@ class Gatherer:
 
 
     
-    def get_paper_by_cord_uid(self, cord_uid):
-        return self.extracted_papers[self.extracted_papers.cord_uid == cord_uid]
-    
-    def get_paper_by_doi(self, doi):
-        return self.extracted_papers[self.extracted_papers.doi == doi]
-    
-    def get_papers_by_relation(self, relation):
-        uids = self.papers[self.papers.relation == relation].cord_uid.tolist()
-        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
-        return result
-    
-    def get_papers_by_meta_relation(self, meta_relation):
-        uids = self.papers[self.papers.meta_relation == meta_relation].cord_uid.tolist()
-        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
-        return result
+#    def get_paper_by_cord_uid(self, cord_uid):
+#        return self.extracted_papers[self.extracted_papers.cord_uid == cord_uid]
+#    
+#    def get_paper_by_doi(self, doi):
+#        return self.extracted_papers[self.extracted_papers.doi == doi]
+#    
+#    def get_papers_by_relation(self, relation):
+#        uids = self.papers[self.papers.relation == relation].cord_uid.tolist()
+#        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
+#        return result
+#    
+#    def get_papers_by_meta_relation(self, meta_relation):
+#        uids = self.papers[self.papers.meta_relation == meta_relation].cord_uid.tolist()
+#        result = self.extracted_papers[self.extracted_papers.cord_uid.isin(uids)]
+#        return result
 
 class PapersRegistry:
     def __init__(self):
