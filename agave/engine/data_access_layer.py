@@ -32,7 +32,7 @@ class CooccurrencyGraph:
             return result
 
     @staticmethod
-    def _get_shortest_paths(tx, head: str, tail: str) -> ShortestPathsResult:
+    def _get_shortest_paths(tx, head: str, tail: str):
         #        query = (
         #            "MATCH p=allshortestpaths((a)-[*]-(b))"
         #            " WHERE a.entity=$head AND b.entity=$tail"
@@ -125,7 +125,7 @@ class PaperCache:
     def get_papers_by_bigram(self, bigram: str):
         query = """
         SELECT papers
-        FROM bigram_paper
+        FROM bigram_paper_fast
         WHERE bigram = '%s'
         """ % str(
             bigram

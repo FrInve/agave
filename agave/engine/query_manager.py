@@ -27,19 +27,6 @@ class MichaelScott:
     def show_found_paths(self):
         self.stoner.show_meta_paths()
     
-    def gather_papers(self):
-        """
-        This method is DEPRECATED, use _gather_papers instead
-        """
-        for segment in self.stoner.get_selected_path_relations():
-            for relation in segment:
-                if relation == segment[0] or relation == segment[-1]:
-                    original = True
-                else:
-                    original = False
-                self.gatherer.add_papers_from_bigram(relation, original, str(segment))
-        self.gatherer.extract_papers()
-    
     def _gather_papers(self):
         for record_tuple in self.stoner.selected_path:
             record = record_tuple[1]
