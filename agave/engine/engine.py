@@ -38,11 +38,14 @@ class Gatherer:
         self.extracted_papers = pd.DataFrame(data=None, columns=self.extracted_papers.columns)
         self.papers.count_uids()
         papers = self.metadata.get_papers(list(self.papers.counted_uids.index))
-        for paper in papers:
-            new_row = pd.DataFrame(data=[paper], columns=self.extracted_papers.columns)
-            new_row.occurrences = self.papers.counted_uids[paper['cord_uid']]
-            new_row.explained_relations = str(self.papers.get_relations(paper['cord_uid']))
-            self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
+#        for paper in papers:
+#            new_row = pd.DataFrame(data=[paper], columns=self.extracted_papers.columns)
+#            new_row.occurrences = self.papers.counted_uids[paper['cord_uid']]
+#            new_row.explained_relations = str(self.papers.get_relations(paper['cord_uid']))
+#            self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
+        papers['occurrences'] = papers.cord_uid.apply(lambda x: self.papers.counted_uids[x])
+        papers['explained_relations'] = papers.cord_uid.apply(lambda x: self.papers.get_relations(x))
+        self.extracted_papers = papers
 
 
 

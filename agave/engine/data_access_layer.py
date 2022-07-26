@@ -125,7 +125,7 @@ class PaperCache:
     def get_papers_by_bigram(self, bigram: str):
         query = """
         SELECT papers
-        FROM bigram_paper_fast
+        FROM bigram_paper
         WHERE bigram = '%s'
         """ % str(
             bigram
@@ -200,8 +200,8 @@ class Metadata:
         """ % ('(' + ','.join(["\'"+id+"\'" for id in cord_uids]) + ')')
         try:
             result = pd.read_sql(query, self.engine)
-            result = result.T.to_dict().values()
+            #result = result.T.to_dict().values()
         except Exception as e:
             print(e)
-            result = {}
+            result = None
         return result
