@@ -1,3 +1,4 @@
+from typing import Type
 import pandas as pd
 
 class Gatherer:
@@ -143,7 +144,16 @@ class Stoner:
         #    segment.show_selected_path()
         segment_names = [str(x) for x in self.meta_path.values()]
         idx=0
+        # Fix empty segments
+        self.selected_path = [(-1, 'SKIP') if elem is None else elem for elem in self.selected_path]
         for i, segment in self.selected_path:
+            if i==-1:
+                print(segment_names[idx])
+                print('SKIP')
+                print('--------------------------')
+                idx+=1
+                continue
+        # Go on with common behaviour
             print(segment_names[idx])
             print(i, segment.relationships)
             print('--------------------------')

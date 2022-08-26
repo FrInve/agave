@@ -194,6 +194,14 @@ class Metadata:
     def get_papers(self, cord_uids):
         #result = [self.get_paper(cord_uid) for cord_uid in cord_uids]
         #return [elem for elem in result if elem is not None]
+        if len(cord_uids) == 0: # Check if input list is empty
+            query = "SELECT * FROM metadata LIMIT 1"
+            try:
+                result = pd.read_sql(query, self.engine)
+            except Exception as e:
+                print(e)
+                result = None
+            return result[0:0]
         query = """SELECT *
         FROM metadata
         WHERE cord_uid IN %s ;

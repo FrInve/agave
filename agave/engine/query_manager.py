@@ -29,6 +29,8 @@ class MichaelScott:
     
     def _gather_papers(self):
         for record_tuple in self.stoner.selected_path:
+            if record_tuple[0] == -1: #Check if path is missing
+                continue
             record = record_tuple[1]
             segment = record.relationships
             for relation in segment:
