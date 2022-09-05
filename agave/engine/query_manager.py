@@ -7,8 +7,8 @@ class MichaelScott:
         self.query = []
 
 
-    def find_single_chain(self, entities):
-        self.stoner.get_meta_path(entities)
+    def find_single_chain(self, entities,npmi_thr:float=0):
+        self.stoner.get_meta_path(entities, npmi_thr)
     
     def show_single_chain_result(self):
         self.stoner.show_meta_paths()
@@ -20,9 +20,9 @@ class MichaelScott:
         self.stoner.select_path(path_idxs)
         self.stoner.show_selected_path()
 
-    def find_graphical_abstract(self, ga):
+    def find_graphical_abstract(self, ga, npmi_thr: float=0):
         for chain in ga.chains:
-            self.stoner.get_meta_path(chain)
+            self.stoner.get_meta_path(chain,npmi_thr)
     
     def show_found_paths(self):
         self.stoner.show_meta_paths()

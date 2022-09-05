@@ -118,11 +118,11 @@ class Stoner:
         self.meta_path = {}
         self.selected_path = []
     
-    def get_meta_path(self, chain):
+    def get_meta_path(self, chain, npmi_thr:float=0):
         #self.meta_path = {}
         for first, second in zip(chain, chain[1:]):
            ms = MetaSegment(first, second)
-           ms.shortest_paths=self.graph_db.get_shortest_paths(first, second)
+           ms.shortest_paths=self.graph_db.get_shortest_paths(first, second, npmi_thr)
            self.meta_path[str(ms)] = ms
     
     def get_meta_paths(self, chains):

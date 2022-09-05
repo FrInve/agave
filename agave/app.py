@@ -28,8 +28,8 @@ class Agave:
         print(res)
         return res
     
-    def find_graphical_abstract(self):
-        self.manager.find_graphical_abstract(self.graphical_abstract)
+    def find_graphical_abstract(self, npmi_thr:float=0):
+        self.manager.find_graphical_abstract(self.graphical_abstract,npmi_thr)
     
     def show_found_paths(self):
         self.manager.show_found_paths()

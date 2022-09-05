@@ -26,13 +26,13 @@ class CooccurrencyGraph:
         result = tx.run("MATCH () RETURN 1 LIMIT 1")
         return result
 
-    def get_shortest_paths(self, head: str, tail: str):
+    def get_shortest_paths(self, head: str, tail: str, npmi_thr:float):
         with self.driver.session() as session:
-            result = session.read_transaction(self._get_shortest_paths, head, tail)
+            result = session.read_transaction(self._get_shortest_paths, head, tail, npmi_thr)
             return result
 
     @staticmethod
-    def _get_shortest_paths(tx, head: str, tail: str):
+    def _get_shortest_paths(tx, head: str, tail: str, npmi_thr: float=0):
         #        query = (
         #            "MATCH p=allshortestpaths((a)-[*]-(b))"
         #            " WHERE a.entity=$head AND b.entity=$tail"
@@ -53,11 +53,11 @@ class CooccurrencyGraph:
             " WITH path AS path,"
             "      avg(rela.npmi) AS average_relationship_npmi,"
             "      collect(rela.name) AS relas"
-            # " WHERE average_relationship_npmi > 1"
+            " WHERE average_relationship_npmi > $npmi_thr"
             " RETURN path, average_relationship_npmi, relas"
             " ORDER BY average_relationship_npmi DESC"
         )
-        result = tx.run(query, head=head, tail=tail)
+        result = tx.run(query, head=head, tail=tail, npmi_thr=npmi_thr)
         out = ShortestPathsResult(result)
         return out
 
