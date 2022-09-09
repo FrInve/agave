@@ -137,6 +137,9 @@ class Stoner:
     def select_path(self,indexes):
         self.selected_path = []
         for position, segment in enumerate(self.meta_path.values()):
+            #Check if index is -1, skip this metasegment
+            if indexes[position] is -1:
+                continue
             self.selected_path.append(segment.select_path(indexes[position]))
     
     def show_selected_path(self):
