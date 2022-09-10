@@ -1,8 +1,6 @@
-import neo4j
-import logging
 from neo4j import GraphDatabase
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert, Column, MetaData, Table, String
 import json
 
 
@@ -119,9 +117,6 @@ class PaperCache:
             print("I can't connect to paper cache")
             raise
 
-    #        self.by_entity = pickledb.load(path_entity, False)
-    #        self.by_bigram = pickledb.load(path_bigram, False)
-    #
     def get_papers_by_bigram(self, bigram: str):
         query = """
         SELECT papers
@@ -137,9 +132,6 @@ class PaperCache:
         except Exception:
             return []
 
-    #    def get_papers_by_bigram(self, bigram):
-    #        return self.by_bigram.get(bigram)
-    #
     def get_papers_by_bigrams(self, bigrams: list[str]) -> dict:
         result = {}
         for bigram in bigrams:
@@ -161,13 +153,6 @@ class Metadata:
             print("I can't connect to metadata table")
             raise
 
-    #        if sample:
-    #            self.df = pd.read_csv(metadata_csv_path, nrows=10000)
-    #        else:
-    #            self.df = pd.read_csv(metadata_csv_path)
-    #        self.df['publish_time'] = pd.to_datetime(self.df['publish_time'])
-    #        self.df = self.df.set_index('cord_uid')
-    #
     def get_paper(self, cord_uid):
         query = """
         SELECT *
@@ -183,17 +168,7 @@ class Metadata:
             print("Paper not found")
             return
 
-    #    def get_paper(self, cord_uid):
-    #        try:
-    #            result = self.df.loc[cord_uid].to_dict()
-    #            result['cord_uid'] = cord_uid
-    #            return result
-    #        except KeyError:
-    #            return
-    #
     def get_papers(self, cord_uids):
-        #result = [self.get_paper(cord_uid) for cord_uid in cord_uids]
-        #return [elem for elem in result if elem is not None]
         if len(cord_uids) == 0: # Check if input list is empty
             query = "SELECT * FROM metadata LIMIT 1"
             try:
@@ -202,14 +177,32 @@ class Metadata:
                 print(e)
                 result = None
             return result[0:0]
-        query = """SELECT *
-        FROM metadata
-        WHERE cord_uid IN %s ;
-        """ % ('(' + ','.join(["\'"+id+"\'" for id in cord_uids]) + ')')
-        try:
-            result = pd.read_sql(query, self.engine)
-            #result = result.T.to_dict().values()
-        except Exception as e:
-            print(e)
-            result = None
+
+        with self.engine.connect() as connection:
+            # Create tmp table for cord_uids of papers from method parameter
+            META_DATA = MetaData(bind=connection)
+
+            cord_uids_tmp_table = Table("cord_uid_tmp", META_DATA,
+            Column("cord_uid", String(30), primary_key=True),
+            prefixes=['OR REPLACE TEMPORARY'],
+            )
+
+            META_DATA.create_all(connection)
+
+            with connection.begin():
+                insert_uids = connection.execute(
+                    insert(cord_uids_tmp_table),
+                    [{'cord_uid':cord_uid} for cord_uid in cord_uids]
+                )
+        
+            # Left join the tmp table with the metadata table
+            query = """SELECT metadata.*
+            FROM cord_uid_tmp
+            LEFT JOIN metadata ON cord_uid_tmp.cord_uid = metadata.cord_uid"""
+            try:
+                result = pd.read_sql(query, connection)
+                #result = result.T.to_dict().values()
+            except Exception as e:
+                print(e)
+                result = None
         return result
