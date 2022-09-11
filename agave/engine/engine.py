@@ -12,41 +12,15 @@ class Gatherer:
     def add_papers_from_bigram(self, bigram: str, original: bool, meta_relation: str):
         uids = self.cache.get_papers_by_bigram(bigram)
         self.papers.add(uids, bigram, original, meta_relation)
-        #try:
-        #    self.papers[meta_relation]
-        #except KeyError:
-        #    self.papers[meta_relation] = {bigram:[]}
-        #finally: 
-        #    self.papers[meta_relation][bigram] = {'original':original, 'uids':uids}
-        #print(self.papers.get_all_uids())
-    
-    def _extract_papers(self):
-        # Initialize the structure again
-        self.extracted_papers = pd.DataFrame(data=None, columns=self.extracted_papers.columns)
-        grouped = self.papers.groupby(by=['cord_uid']).count()
-        uids = grouped.reset_index().cord_uid.tolist()
-        papers = self.metadata.get_papers(uids)
-        for paper in papers:
-            new_row = pd.DataFrame(data=[paper], columns=self.extracted_papers.columns)
-            new_row = new_row.set_index('cord_uid')
-            new_row.occurrences = grouped.relation
-            new_row = new_row.reset_index()
-            relations = self.papers[self.papers.cord_uid == paper['cord_uid']].relation.tolist()
-            new_row.explained_relations = str(relations)
-            self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
     
     def extract_papers(self):
         self.extracted_papers = pd.DataFrame(data=None, columns=self.extracted_papers.columns)
         self.papers.count_uids()
         papers = self.metadata.get_papers(list(self.papers.counted_uids.index))
-#        for paper in papers:
-#            new_row = pd.DataFrame(data=[paper], columns=self.extracted_papers.columns)
-#            new_row.occurrences = self.papers.counted_uids[paper['cord_uid']]
-#            new_row.explained_relations = str(self.papers.get_relations(paper['cord_uid']))
-#            self.extracted_papers = pd.concat([self.extracted_papers, new_row], ignore_index=True)
-        papers['occurrences'] = papers.cord_uid.apply(lambda x: self.papers.counted_uids[x])
+#        papers['occurrences'] = papers.cord_uid.apply(lambda x: self.papers.counted_uids[x])
         papers['explained_relations'] = papers.cord_uid.apply(lambda x: self.papers.get_relations(x))
-        self.extracted_papers = papers
+        papers['weighted_occurrencies'] = papers.cord_uid.apply(lambda x: self.papers.get_weighted_occurrencies(x))
+        self.extracted_papers = papers.sort_values(by=['weighted_occurrencies'], ascending=False)
 
 
 class PapersRegistry:
@@ -59,9 +33,10 @@ class PapersRegistry:
         try:
             self.meta_relations[meta_relation]
         except KeyError:
-            self.meta_relations[meta_relation] = {bigram:[]}
+            self.meta_relations[meta_relation] = {bigram:{}, '_bigrams_count':0}
         finally: 
             self.meta_relations[meta_relation][bigram] = {'original':original, 'uids':{uid:True for uid in uids}}
+            self.meta_relations[meta_relation]['_bigrams_count'] += 1
 
         for uid in uids:
             try:
@@ -81,6 +56,8 @@ class PapersRegistry:
         result = []
         for m in self.meta_relations.keys():
             for b in self.meta_relations[m].keys():
+                if b == '_bigrams_count':
+                    continue
                 result += list(self.meta_relations[m][b]['uids'].keys())
         return result
     
@@ -89,6 +66,19 @@ class PapersRegistry:
     
     def get_relations(self, paper):
         return self.paper_bigrams[paper]
+    
+    def get_weighted_occurrencies(self, paper):
+        weighted_occurrencies = 0
+        for meta_relation in self.meta_relations.keys():
+            for bigram in self.meta_relations[meta_relation].keys():
+                if bigram == '_bigrams_count':
+                    continue
+                try:
+                    self.meta_relations[meta_relation][bigram]['uids'][paper]
+                except KeyError:
+                    continue
+                weighted_occurrencies += 1/self.meta_relations[meta_relation]['_bigrams_count']
+        return weighted_occurrencies
 
         
 
