@@ -54,6 +54,7 @@ class CooccurrencyGraph:
             " WHERE average_relationship_npmi > $npmi_thr"
             " RETURN path, average_relationship_npmi, relas"
             " ORDER BY average_relationship_npmi DESC"
+            " LIMIT 10"
         )
         result = tx.run(query, head=head, tail=tail, npmi_thr=npmi_thr)
         out = ShortestPathsResult(result)
