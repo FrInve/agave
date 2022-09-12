@@ -27,7 +27,7 @@ class Gatherer:
 class PapersRegistry:
     def __init__(self):
         self.meta_relations = {} # Structure: meta_relations[meta_relation][bigram]['uids'][uid] -> True
-        self.counted_uids = pd.Series(dtype='string').value_counts()
+        #self.counted_uids = pd.Series(dtype='string').value_counts()
         self.paper_bigrams = {}
     
     def add(self, uids: list[str], bigram: str, original: bool, meta_relation: str, npmi: float):
