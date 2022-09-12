@@ -20,7 +20,7 @@ class Gatherer:
 #        papers['occurrences'] = papers.cord_uid.apply(lambda x: self.papers.counted_uids[x])
         papers['explained_relations'] = papers.cord_uid.apply(lambda x: self.papers.get_relations(x))
         papers['weighted_occurrencies'] = papers.cord_uid.apply(lambda x: self.papers.get_weighted_occurrencies(x))
-        self.extracted_papers = papers.sort_values(by=['weighted_occurrencies'], ascending=False)
+        self.extracted_papers = papers.sort_values(by=['weighted_occurrencies','citedby_count','publish_time'], ascending=False)
 
 
 class PapersRegistry:
