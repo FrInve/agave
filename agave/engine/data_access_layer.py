@@ -196,7 +196,13 @@ class Metadata:
                 )
         
             # Left join the tmp table with the metadata table
-            query = """SELECT metadata.*
+            query = """SELECT metadata.cord_uid,
+            metadata.doi,
+            metadata.title,
+            metadata.authors,
+            metadata.abstract,
+            metadata.publish_time,
+            metadata.journal
             FROM cord_uid_tmp
             LEFT JOIN metadata ON cord_uid_tmp.cord_uid = metadata.cord_uid"""
             try:
