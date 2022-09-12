@@ -9,9 +9,9 @@ class Gatherer:
         self.papers = PapersRegistry()
         self.extracted_papers = pd.DataFrame(data=None, columns=['cord_uid','title','abstract','doi','authors','journal','publish_time','occurrences','explained_relations'])
     
-    def add_papers_from_bigram(self, bigram: str, original: bool, meta_relation: str):
+    def add_papers_from_bigram(self, bigram: str, original: bool, meta_relation: str, npmi: float):
         uids = self.cache.get_papers_by_bigram(bigram)
-        self.papers.add(uids, bigram, original, meta_relation)
+        self.papers.add(uids, bigram, original, meta_relation, npmi)
     
     def extract_papers(self):
         self.extracted_papers = pd.DataFrame(data=None, columns=self.extracted_papers.columns)
@@ -20,6 +20,7 @@ class Gatherer:
 #        papers['occurrences'] = papers.cord_uid.apply(lambda x: self.papers.counted_uids[x])
         papers['explained_relations'] = papers.cord_uid.apply(lambda x: self.papers.get_relations(x))
         papers['weighted_occurrencies'] = papers.cord_uid.apply(lambda x: self.papers.get_weighted_occurrencies(x))
+        papers['npmi_sum'] = papers.cord_uid.apply(lambda x: self.papers.get_npmi_sum(x))
         self.extracted_papers = papers.sort_values(by=['weighted_occurrencies','citedby_count','publish_time'], ascending=False)
 
 
@@ -29,13 +30,13 @@ class PapersRegistry:
         self.counted_uids = pd.Series(dtype='string').value_counts()
         self.paper_bigrams = {}
     
-    def add(self, uids: list[str], bigram: str, original: bool, meta_relation: str):
+    def add(self, uids: list[str], bigram: str, original: bool, meta_relation: str, npmi: float):
         try:
             self.meta_relations[meta_relation]
         except KeyError:
             self.meta_relations[meta_relation] = {bigram:{}, '_bigrams_count':0}
         finally: 
-            self.meta_relations[meta_relation][bigram] = {'original':original, 'uids':{uid:True for uid in uids}}
+            self.meta_relations[meta_relation][bigram] = {'npmi':npmi, 'original':original, 'uids':{uid:True for uid in uids}}
             self.meta_relations[meta_relation]['_bigrams_count'] += 1
 
         for uid in uids:
@@ -83,6 +84,20 @@ class PapersRegistry:
                     continue
                 weighted_occurrencies += 1/self.meta_relations[meta_relation]['_bigrams_count']
         return weighted_occurrencies
+    
+    def get_npmi_sum(self, paper):
+        npmi_sum = 0
+        for meta_relation in self.meta_relations.keys():
+            for bigram in self.meta_relations[meta_relation].keys():
+                if bigram == '_bigrams_count':
+                    continue
+                try:
+                    self.meta_relations[meta_relation][bigram]['uids'][paper]
+                except KeyError:
+                    continue
+                npmi_sum += self.meta_relations[meta_relation][bigram]['npmi']
+        return npmi_sum 
+
 
         
 

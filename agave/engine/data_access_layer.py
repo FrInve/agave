@@ -202,7 +202,8 @@ class Metadata:
             metadata.authors,
             metadata.abstract,
             metadata.publish_time,
-            metadata.journal
+            metadata.journal,
+            metadata.citedby_count
             FROM cord_uid_tmp
             LEFT JOIN metadata ON cord_uid_tmp.cord_uid = metadata.cord_uid"""
             try:

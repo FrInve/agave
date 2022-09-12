@@ -38,5 +38,5 @@ class MichaelScott:
                     original = True
                 else:
                     original = False
-                self.gatherer.add_papers_from_bigram(relation, original, record.get_meta_path_name())
+                self.gatherer.add_papers_from_bigram(relation, original, record.get_meta_path_name(), record.avg_npmi)
         self.gatherer.extract_papers()
