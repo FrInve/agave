@@ -26,7 +26,7 @@ class Gatherer:
 class PapersRegistry:
     def __init__(self):
         self.meta_relations = {} # Structure: meta_relations[meta_relation][bigram]['uids'][uid] -> True
-        self.counted_uids = pd.Series().value_counts()
+        self.counted_uids = pd.Series(dtype='string').value_counts()
         self.paper_bigrams = {}
     
     def add(self, uids: list[str], bigram: str, original: bool, meta_relation: str):
@@ -42,9 +42,11 @@ class PapersRegistry:
             try:
                 self.paper_bigrams[uid]
             except KeyError:
-                self.paper_bigrams[uid] = []
-            finally:
-                self.paper_bigrams[uid].append(bigram)
+                self.paper_bigrams[uid] = {}
+            try:
+                self.paper_bigrams[uid][bigram]
+            except KeyError:
+                self.paper_bigrams[uid][bigram] = True
     
     def get_uids(self, bigram: str, meta_relation: str) -> list[str]:
         try:
@@ -53,6 +55,7 @@ class PapersRegistry:
             return []
     
     def get_all_uids(self):
+        """DEPRECATED"""
         result = []
         for m in self.meta_relations.keys():
             for b in self.meta_relations[m].keys():
@@ -62,10 +65,11 @@ class PapersRegistry:
         return result
     
     def count_uids(self):
+        """DEPRECATED"""
         self.counted_uids = pd.Series(self.get_all_uids()).value_counts()
     
     def get_relations(self, paper):
-        return self.paper_bigrams[paper]
+        return list(self.paper_bigrams[paper].keys())
     
     def get_weighted_occurrencies(self, paper):
         weighted_occurrencies = 0
