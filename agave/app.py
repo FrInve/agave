@@ -42,7 +42,7 @@ class Agave:
         self.manager.select_path([0]*indexes_len)
     
     def show_found_papers(self, head=10):
-        return self.manager.gatherer.extracted_papers.head(10)
+        return self.manager.gatherer.extracted_papers.head(head)
     
     def retrieve_papers(self):
         self.manager._gather_papers()
