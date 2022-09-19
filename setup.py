@@ -25,6 +25,13 @@ setup(
         'Programming Language :: Python :: 3.10',
     ],
     packages=['agave'],
-    #install_requires=[],
+    install_requires=[
+        'pandas',
+        'neo4j',
+        'sqlalchemy',
+        'pymysql',
+        'networkx',
+        'pyarrow'
+    ]
     #scripts=[]
 )
