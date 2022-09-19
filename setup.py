@@ -26,7 +26,7 @@ setup(
     ],
     packages=['agave'],
     install_requires=[
-        'pandas',
+        #'pandas',
         'neo4j',
         'sqlalchemy',
         'pymysql',
