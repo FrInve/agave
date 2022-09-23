@@ -1,11 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", 'r') as f:
     readme_text = f.read()
 
 setup(
     name='agave',
-    version='0.1.0.dev1',
+    version='0.2.0.dev2',
     description='a graphical abstract verification engine',
     license="bsd-3-clause",
     long_description=readme_text,
@@ -24,7 +24,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
-    packages=['agave'],
+    packages=find_packages(),
     install_requires=[
         #'pandas',
         'neo4j',
